@@ -31,4 +31,22 @@ export class PrismaUsersRepository implements UsersRepository {
 
     return user
   }
+
+  async getUserById(userId: string) {
+    const user = await prisma.users.findUnique({
+      where: {
+        id: userId,
+      },
+    })
+
+    return user
+  }
+
+  async deleteUser(userId: string) {
+    await prisma.users.delete({
+      where: {
+        id: userId,
+      },
+    })
+  }
 }
