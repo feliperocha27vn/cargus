@@ -2,7 +2,7 @@ import { app } from '@/app'
 import request from 'supertest'
 import { createNewUser } from 'utils/tests/create-new-user'
 
-describe('User Authentication Controller', () => {
+describe('Authenticate user', () => {
   beforeAll(() => {
     app.ready()
   })
@@ -11,7 +11,7 @@ describe('User Authentication Controller', () => {
     app.close()
   })
 
-  it('should authenticate an existing user', async () => {
+  it('should be able to authenticate an existing user', async () => {
     const { user } = await createNewUser()
 
     const reply = await request(app.server).post('/users/authenticate').send({
