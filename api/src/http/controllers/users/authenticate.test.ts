@@ -14,7 +14,7 @@ describe('Authenticate user', () => {
   it('should be able to authenticate an existing user', async () => {
     const { user } = await createNewUser()
 
-    const reply = await request(app.server).post('/users/authenticate').send({
+    const reply = await request(app.server).post('/authenticate').send({
       email: user.email,
       password: '123456',
     })

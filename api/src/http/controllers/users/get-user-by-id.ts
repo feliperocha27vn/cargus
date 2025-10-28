@@ -6,7 +6,7 @@ import z from 'zod'
 
 export const getUserById: FastifyPluginAsyncZod = async app => {
   app.get(
-    '/users',
+    '/me',
     {
       onRequest: [verifyJwt],
       schema: {

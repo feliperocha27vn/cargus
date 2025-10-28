@@ -1,3 +1,4 @@
+import { env } from '@/env'
 import { InvalidCredentialsError } from '@/errors/invalid-credentials-error'
 import { makeAuthenticateUser } from '@/factories/users/make-authenticate-user'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
@@ -5,7 +6,7 @@ import z, { email } from 'zod'
 
 export const authenticateUser: FastifyPluginAsyncZod = async app => {
   app.post(
-    '/users/authenticate',
+    '/authenticate',
     {
       schema: {
         body: z.object({
@@ -13,9 +14,7 @@ export const authenticateUser: FastifyPluginAsyncZod = async app => {
           password: z.string().min(6),
         }),
         response: {
-          200: z.object({
-            token: z.string(),
-          }),
+          200: z.void(),
           422: z.object({
             message: z.string(),
           }),
@@ -48,15 +47,23 @@ export const authenticateUser: FastifyPluginAsyncZod = async app => {
           }
         )
 
+        const isProd = env.NODE_ENV === 'production'
+
         return reply
           .status(200)
           .setCookie('refreshToken', refreshToken, {
             path: '/',
-            secure: true,
+            secure: isProd,
             httpOnly: true,
             sameSite: 'lax',
           })
-          .send({ token })
+          .setCookie('token', token, {
+            path: '/',
+            secure: isProd,
+            httpOnly: true,
+            sameSite: 'lax',
+          })
+          .send()
       } catch (error) {
         if (error instanceof InvalidCredentialsError) {
           return reply.status(422).send({ message: error.message })
