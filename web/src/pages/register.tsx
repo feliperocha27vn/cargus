@@ -1,54 +1,46 @@
-import type { SignInRequest } from '@/api/sign-in'
+import { type SignUpRequest, signUp } from '@/api/sign-up'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { useAuth } from '@/context/useAuth'
-import {
-  createFileRoute,
-  Link,
-  redirect,
-  useNavigate,
-  useSearch,
-} from '@tanstack/react-router'
-import { Lock, Mail } from 'lucide-react'
+import { useMutation } from '@tanstack/react-query'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { Lock, Mail, UserCircle } from 'lucide-react'
 import { useForm } from 'react-hook-form'
-import { Toaster } from 'sonner'
+import { Toaster, toast } from 'sonner'
 import cargusLogo from '../assets/cargus-logo.png'
 
-export const Route = createFileRoute('/')({
-  beforeLoad: async ({ context }) => {
-    const ok = await context.auth.ensureAuth()
-    if (ok) {
-      throw redirect({ to: '/dashboard' })
-    }
-  },
-  component: Index,
+export const Route = createFileRoute('/register')({
+  component: RouteComponent,
 })
 
-interface SearchParams {
-  email?: string
-}
-
-function Index() {
-  const search: SearchParams = useSearch({ from: '/' })
-
+function RouteComponent() {
   const {
     register,
     handleSubmit,
     formState: { isSubmitting },
-  } = useForm<SignInRequest>({
-    defaultValues: {
-      email: search.email || '',
-    },
-  })
-  const { signIn } = useAuth()
+  } = useForm<SignUpRequest>()
   const navigate = useNavigate()
 
-  async function onSubmit(data: SignInRequest) {
-    await signIn(data)
+  const { mutateAsync: signUpFn } = useMutation({
+    mutationFn: signUp,
+  })
 
-    navigate({
-      to: '/dashboard',
-    })
+  async function handleSignUp(data: SignUpRequest) {
+    try {
+      await signUpFn({
+        name: data.name,
+        email: data.email,
+        password: data.password,
+      })
+
+      toast.success('Cadastro realizado com sucesso!', {
+        action: {
+          label: 'Login',
+          onClick: () => navigate({ to: `/?email=${data.email}` }),
+        },
+      })
+    } catch {
+      toast.error('Erro ao cadastrar. Tente novamente.')
+    }
   }
 
   return (
@@ -78,13 +70,24 @@ function Index() {
               className="size-[60px] rounded-lg mb-3"
             />
             <div className="flex flex-col gap-y-0.5">
-              <span className="text-4xl font-bold">Login</span>
-              <span className="text-sm font-medium">
-                Por favor faça login na sua conta
-              </span>
+              <span className="text-4xl font-bold">Cadastrar</span>
             </div>
           </div>
-          <form className="space-y-4 w-full" onSubmit={handleSubmit(onSubmit)}>
+          <form
+            className="space-y-4 w-full"
+            onSubmit={handleSubmit(handleSignUp)}
+          >
+            <div className="relative">
+              <Input
+                type="text"
+                placeholder="Nome"
+                className=" bg-zinc-50 text-zinc-800 peer ps-12"
+                {...register('name')}
+              />
+              <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">
+                <UserCircle size={24} aria-hidden="true" />
+              </div>
+            </div>
             <div className="relative">
               <Input
                 type="email"
@@ -107,21 +110,14 @@ function Index() {
                 <Lock size={24} aria-hidden="true" />
               </div>
             </div>
-
             <Button
               type="submit"
               className="w-full text-lg p-6"
               disabled={isSubmitting}
             >
-              Login
+              Cadastrar-se
             </Button>
           </form>
-          <p className="w-full">
-            Não tem uma conta?{' '}
-            <Link to="/register" className="hover:underline">
-              <span className="font-bold cursor-default">Cadastra-se</span>
-            </Link>
-          </p>
         </div>
       </div>
     </>

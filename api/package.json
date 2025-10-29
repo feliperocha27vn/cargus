@@ -12,6 +12,9 @@
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.19.0",
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "devDependencies": {
     "@types/node": "^24.9.1",
     "@types/supertest": "^6.0.3",
