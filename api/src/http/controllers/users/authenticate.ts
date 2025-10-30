@@ -24,6 +24,8 @@ export const authenticateUser: FastifyPluginAsyncZod = async app => {
     async (request, reply) => {
       const { email, password } = request.body
 
+      console.log(email, password)
+
       try {
         const authenticateUserUseCase = makeAuthenticateUser()
 
