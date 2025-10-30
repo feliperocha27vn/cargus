@@ -5,9 +5,15 @@ export interface SignInRequest {
   password: string
 }
 
+export interface SignInReply {
+  token: string
+}
+
 export async function signIn({ email, password }: SignInRequest) {
-  await api.post('/authenticate', {
+  const response = await api.post<SignInReply>('/authenticate', {
     email,
     password,
   })
+
+  return response.data
 }
